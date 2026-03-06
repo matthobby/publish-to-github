@@ -190,8 +190,29 @@ Si l'utilisateur a déjà un repo marketplace et veut mettre à jour sa skill :
 
 1. Identifie le repo local (demande le chemin ou cherche dans `mnt/Documents/`)
 2. Copie les fichiers mis à jour de la skill dans `plugins/<nom>/skills/<nom>/`
-3. Bump la version dans `plugin.json` si pertinent
+3. **TOUJOURS bumper la version dans `plugin.json`** — c'est ce que Claude Desktop utilise pour détecter les mises à jour. Sans ce bump, l'utilisateur restera sur l'ancienne version même après un push.
+
+   Pour bumper la version, lis le `plugin.json` actuel, parse la version semver (ex: `1.0.0`), et incrémente :
+   - **Patch** (1.0.0 → 1.0.1) : corrections mineures, typos
+   - **Minor** (1.0.0 → 1.1.0) : nouvelles fonctionnalités, ajouts de sections
+   - **Major** (1.0.0 → 2.0.0) : refonte complète, changements breaking
+
+   En cas de doute, utilise minor. Exemple en Python :
+
+   ```python
+   import json
+   with open(plugin_json_path, 'r') as f:
+       data = json.load(f)
+   parts = data['version'].split('.')
+   parts[1] = str(int(parts[1]) + 1)  # bump minor
+   parts[2] = '0'  # reset patch
+   data['version'] = '.'.join(parts)
+   with open(plugin_json_path, 'w') as f:
+       json.dump(data, f, indent=2, ensure_ascii=False)
+   ```
+
 4. Stage, commit et donne les commandes pour push
+5. Indique à l'utilisateur d'aller dans **Paramètres > Personnaliser > Plugins** et de rafraîchir le marketplace pour que Claude récupère la nouvelle version
 
 ## Ajout d'un second plugin à un marketplace existant
 
