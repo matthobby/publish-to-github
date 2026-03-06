@@ -253,14 +253,28 @@ Si l'utilisateur a déjà un repo marketplace et veut mettre à jour sa skill :
    cd ~/Documents/<nom-repo>
    git push origin main
    ```
-5. Indique à l'utilisateur d'aller dans **Paramètres > Personnaliser > Plugins** et de cliquer sur le bouton **"Mettre à jour"** qui devrait être actif maintenant.
+5. **Appliquer la mise à jour dans Claude Desktop** :
 
-### Dépannage : bouton "Mettre à jour" grisé
+   Propose les deux options à l'utilisateur :
 
-Si le bouton reste grisé après un push :
-- **Cause probable** : le marketplace a été installé dans Claude Desktop avec le dernier commit disponible sur GitHub à ce moment-là. Claude Desktop compare le SHA du commit local avec celui du remote — s'ils sont identiques, pas de mise à jour.
-- **Solution** : demander à l'utilisateur de **supprimer le marketplace** dans les paramètres puis de **le ré-ajouter** avec la même URL. Claude Desktop re-clonera le repo avec tous les derniers commits.
-- **Prévention** : toujours **pousser sur GitHub AVANT** d'installer ou de mettre à jour le marketplace dans Claude Desktop.
+   **Option A — Attendre la détection automatique** :
+   Le bouton "Mettre à jour" de Claude Desktop finit par détecter les nouveaux commits, mais le polling a un intervalle long (possiblement plusieurs heures). Si l'utilisateur n'est pas pressé, il peut simplement attendre que le bouton s'active dans **Paramètres > Personnaliser > Plugins**.
+
+   **Option B — Mise à jour immédiate (recommandée)** :
+   Pour appliquer la mise à jour tout de suite sans attendre :
+   a. Aller dans **Paramètres > Personnaliser > Plugins**
+   b. Cliquer sur les **"..."** à côté du marketplace
+   c. **Supprimer** le marketplace
+   d. **Ré-ajouter** l'URL du repo : `https://github.com/<user>/<repo>`
+   e. Réinstaller le plugin — il sera à la nouvelle version
+
+   C'est rapide (10 secondes) et ça garantit que Claude Desktop clone la dernière version du repo.
+
+   Présente toujours les deux options et laisse l'utilisateur choisir.
+
+### Règle d'or : toujours push AVANT d'ajouter
+
+Si c'est la première installation du marketplace ou une ré-installation, assure-toi TOUJOURS que le `git push` est fait AVANT d'ajouter l'URL dans Claude Desktop. Sinon le clone sera sur un ancien commit et le bouton "Mettre à jour" restera grisé.
 
 ## Ajout d'un second plugin à un marketplace existant
 
