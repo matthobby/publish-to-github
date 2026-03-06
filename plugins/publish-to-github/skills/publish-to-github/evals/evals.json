@@ -1,0 +1,29 @@
+{
+  "skill_name": "publish-to-github",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "J'ai créé une skill de veille YouTube, elle est dans mon dossier de travail. Je veux la mettre sur GitHub pour pouvoir l'installer dans Claude Desktop.",
+      "expected_output": "La skill doit créer la structure marketplace complète : .claude-plugin/marketplace.json à la racine, plugins/veille-youtube/.claude-plugin/plugin.json, plugins/veille-youtube/skills/veille-youtube/SKILL.md, README.md. Elle doit initialiser git et donner les commandes pour créer le repo et push.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "J'ai modifié ma skill de veille YouTube, le SKILL.md a changé. Mon repo GitHub existe déjà dans ~/Documents/veille-youtube. Il faut mettre à jour.",
+      "expected_output": "La skill doit détecter le repo existant, copier les fichiers mis à jour dans plugins/veille-youtube/skills/veille-youtube/, faire un commit et donner les commandes pour push. Elle ne doit PAS recréer le marketplace.json ou le plugin.json s'ils existent déjà.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Je veux ajouter une deuxième skill 'analyse-seo' à mon marketplace existant qui contient déjà 'veille-youtube'. Le repo est dans ~/Documents/veille-youtube.",
+      "expected_output": "La skill doit créer plugins/analyse-seo/ avec sa structure complète, ajouter une entrée dans le tableau plugins de marketplace.json sans toucher à l'entrée existante veille-youtube, et mettre à jour le README.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I built a skill for generating weekly reports. It's in /tmp/weekly-reports/ with a SKILL.md and evals. Can you package it for GitHub so I can install it as a plugin?",
+      "expected_output": "La skill doit fonctionner en anglais aussi. Elle doit créer la structure marketplace, générer le README en anglais, et adapter les descriptions.",
+      "files": []
+    }
+  ]
+}

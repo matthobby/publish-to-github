@@ -1,0 +1,5 @@
+{
+  "name": "publish-to-github",
+  "description": "Transforme une skill Claude en repo GitHub installable comme plugin dans Claude Desktop.",
+  "version": "1.0.0"
+}

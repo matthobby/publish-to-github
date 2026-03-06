@@ -1,0 +1,16 @@
+{
+  "name": "publish-to-github",
+  "metadata": {
+    "description": "Skills pour publier et partager des skills Claude via GitHub."
+  },
+  "owner": {
+    "name": "MattEpicAdventures"
+  },
+  "plugins": [
+    {
+      "name": "publish-to-github",
+      "source": "./plugins/publish-to-github",
+      "description": "Transforme une skill Claude en repo GitHub installable comme plugin dans Claude Desktop. Cree la structure marketplace complete, init git, et donne les commandes pour push."
+    }
+  ]
+}
