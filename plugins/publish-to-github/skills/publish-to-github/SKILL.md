@@ -190,29 +190,77 @@ Si l'utilisateur a déjà un repo marketplace et veut mettre à jour sa skill :
 
 1. Identifie le repo local (demande le chemin ou cherche dans `mnt/Documents/`)
 2. Copie les fichiers mis à jour de la skill dans `plugins/<nom>/skills/<nom>/`
-3. **TOUJOURS bumper la version dans `plugin.json`** — c'est ce que Claude Desktop utilise pour détecter les mises à jour. Sans ce bump, l'utilisateur restera sur l'ancienne version même après un push.
+3. **TOUJOURS bumper la version dans DEUX fichiers** — c'est essentiel pour que Claude Desktop détecte les mises à jour :
+
+   **a) `plugins/<nom>/.claude-plugin/plugin.json`** — version du plugin :
 
    Pour bumper la version, lis le `plugin.json` actuel, parse la version semver (ex: `1.0.0`), et incrémente :
    - **Patch** (1.0.0 → 1.0.1) : corrections mineures, typos
    - **Minor** (1.0.0 → 1.1.0) : nouvelles fonctionnalités, ajouts de sections
    - **Major** (1.0.0 → 2.0.0) : refonte complète, changements breaking
 
-   En cas de doute, utilise minor. Exemple en Python :
+   En cas de doute, utilise minor.
+
+   **b) `.claude-plugin/marketplace.json`** — ajouter/mettre à jour un champ `version` au niveau root :
+
+   Le marketplace.json doit aussi refléter le changement. Ajoute ou met à jour le champ `version` au niveau racine du marketplace.json pour qu'il corresponde à la dernière version du plugin principal. Cela permet à Claude Desktop de détecter un changement au niveau marketplace.
+
+   Script Python pour bumper les deux fichiers automatiquement :
 
    ```python
-   import json
+   import json, os
+
+   def bump_version(version_str, level='minor'):
+       parts = version_str.split('.')
+       if level == 'major':
+           parts[0] = str(int(parts[0]) + 1)
+           parts[1] = '0'
+           parts[2] = '0'
+       elif level == 'minor':
+           parts[1] = str(int(parts[1]) + 1)
+           parts[2] = '0'
+       else:  # patch
+           parts[2] = str(int(parts[2]) + 1)
+       return '.'.join(parts)
+
+   # Bump plugin.json
+   plugin_json_path = f"plugins/{skill_name}/.claude-plugin/plugin.json"
    with open(plugin_json_path, 'r') as f:
-       data = json.load(f)
-   parts = data['version'].split('.')
-   parts[1] = str(int(parts[1]) + 1)  # bump minor
-   parts[2] = '0'  # reset patch
-   data['version'] = '.'.join(parts)
+       plugin_data = json.load(f)
+   new_version = bump_version(plugin_data['version'], 'minor')
+   plugin_data['version'] = new_version
    with open(plugin_json_path, 'w') as f:
-       json.dump(data, f, indent=2, ensure_ascii=False)
+       json.dump(plugin_data, f, indent=2, ensure_ascii=False)
+
+   # Bump marketplace.json
+   marketplace_json_path = ".claude-plugin/marketplace.json"
+   with open(marketplace_json_path, 'r') as f:
+       marketplace_data = json.load(f)
+   marketplace_data['version'] = new_version
+   with open(marketplace_json_path, 'w') as f:
+       json.dump(marketplace_data, f, indent=2, ensure_ascii=False)
+
+   print(f"Version bumpée : {new_version}")
    ```
 
-4. Stage, commit et donne les commandes pour push
-5. Indique à l'utilisateur d'aller dans **Paramètres > Personnaliser > Plugins** et de rafraîchir le marketplace pour que Claude récupère la nouvelle version
+4. Stage, commit et donne les commandes pour push :
+   ```bash
+   git add -A
+   git commit -m "v{new_version} — description du changement"
+   ```
+   Puis indique à l'utilisateur :
+   ```
+   cd ~/Documents/<nom-repo>
+   git push origin main
+   ```
+5. Indique à l'utilisateur d'aller dans **Paramètres > Personnaliser > Plugins** et de cliquer sur le bouton **"Mettre à jour"** qui devrait être actif maintenant.
+
+### Dépannage : bouton "Mettre à jour" grisé
+
+Si le bouton reste grisé après un push :
+- **Cause probable** : le marketplace a été installé dans Claude Desktop avec le dernier commit disponible sur GitHub à ce moment-là. Claude Desktop compare le SHA du commit local avec celui du remote — s'ils sont identiques, pas de mise à jour.
+- **Solution** : demander à l'utilisateur de **supprimer le marketplace** dans les paramètres puis de **le ré-ajouter** avec la même URL. Claude Desktop re-clonera le repo avec tous les derniers commits.
+- **Prévention** : toujours **pousser sur GitHub AVANT** d'installer ou de mettre à jour le marketplace dans Claude Desktop.
 
 ## Ajout d'un second plugin à un marketplace existant
 
